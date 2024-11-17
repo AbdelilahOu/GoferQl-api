@@ -39,10 +39,16 @@ func (q *Queries) GetTag(ctx context.Context, id uuid.UUID) (Tag, error) {
 const listTags = `-- name: ListTags :many
 SELECT id, name FROM tags
 ORDER BY name
+LIMIT $1 OFFSET $2
 `
 
-func (q *Queries) ListTags(ctx context.Context) ([]Tag, error) {
-	rows, err := q.db.Query(ctx, listTags)
+type ListTagsParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListTags(ctx context.Context, arg ListTagsParams) ([]Tag, error) {
+	rows, err := q.db.Query(ctx, listTags, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
