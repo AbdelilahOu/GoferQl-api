@@ -33,6 +33,11 @@ func init() {
 		Resolve: resolvers.GetCommentUser,
 	})
 
+	CommentType.AddFieldConfig("children", &graphql.Field{
+		Type:    graphql.NewList(CommentType),
+		Resolve: resolvers.ListCommentChildren,
+	})
+
 	TagType.AddFieldConfig("posts", &graphql.Field{
 		Type:    graphql.NewList(PostType),
 		Resolve: resolvers.ListTagPosts,

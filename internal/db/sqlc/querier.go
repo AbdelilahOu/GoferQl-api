@@ -8,6 +8,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
@@ -29,6 +30,7 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByPostID(ctx context.Context, id uuid.UUID) (User, error)
 	ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error)
+	ListCommentsByParentID(ctx context.Context, parentID pgtype.UUID) ([]Comment, error)
 	ListCommentsByPostID(ctx context.Context, arg ListCommentsByPostIDParams) ([]Comment, error)
 	ListCommentsByUserID(ctx context.Context, arg ListCommentsByUserIDParams) ([]Comment, error)
 	ListPostTags(ctx context.Context, postID uuid.UUID) ([]Tag, error)

@@ -43,8 +43,7 @@ SELECT
     *
 FROM posts
 WHERE user_id = $1
-ORDER BY created_at DESC
-LIMIT $2 OFFSET $3;
+ORDER BY created_at DESC;
 
 -- name: ListPostsByTagID :many
 SELECT 

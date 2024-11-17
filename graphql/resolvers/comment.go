@@ -34,25 +34,12 @@ func ListCommentsByPostID(p graphql.ResolveParams) (interface{}, error) {
 func ListUserComments(p graphql.ResolveParams) (interface{}, error) {
 	dbQueries := p.Context.Value("db").(*db.Queries)
 
-	var Limit int32 = 20
-	var Offset int32 = 0
 	var UserID uuid.UUID
-
-	if val, ok := p.Args["limit"]; ok && val != nil {
-		Limit = val.(int32)
-	}
-	if val, ok := p.Args["offset"]; ok && val != nil {
-		Offset = val.(int32)
-	}
 	if val, ok := p.Source.(db.User); ok {
 		UserID = val.ID
 	}
 
-	return dbQueries.ListPostsByUserID(p.Context, db.ListPostsByUserIDParams{
-		UserID: utils.UuidToPgTypeUuid(UserID),
-		Limit:  Limit,
-		Offset: Offset,
-	})
+	return dbQueries.ListCommentsByUserID(p.Context, utils.UuidToPgTypeUuid(UserID))
 }
 
 func ListPostComments(p graphql.ResolveParams) (interface{}, error) {
@@ -77,6 +64,18 @@ func ListPostComments(p graphql.ResolveParams) (interface{}, error) {
 		Limit:  Limit,
 		Offset: Offset,
 	})
+}
+
+func ListCommentChildren(p graphql.ResolveParams) (interface{}, error) {
+	dbQueries := p.Context.Value("db").(*db.Queries)
+
+	var CommentID uuid.UUID
+
+	if val, ok := p.Source.(db.Comment); ok {
+		CommentID = val.ID
+	}
+
+	return dbQueries.ListCommentsByParentID(p.Context, utils.UuidToPgTypeUuid(CommentID))
 }
 
 func CreateComment(p graphql.ResolveParams) (interface{}, error) {
