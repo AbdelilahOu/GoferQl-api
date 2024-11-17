@@ -8,23 +8,20 @@ INSERT INTO comments (
     $1, $2, $3, $4
 ) RETURNING *;
 
--- name: GetComment :one
-SELECT 
-    c.*,
-    u.username as author_name
-FROM comments c
-LEFT JOIN users u ON c.user_id = u.id
-WHERE c.id = $1;
+-- name: UpdateComment :one
+UPDATE comments
+SET 
+    content = $2
+WHERE id = $1
+RETURNING *;
 
 -- name: ListCommentsByPost :many
 SELECT 
-    c.*,
-    u.username as author_name
-FROM comments c
-LEFT JOIN users u ON c.user_id = u.id
-WHERE c.post_id = $1
-ORDER BY c.created_at DESC;
+    *
+FROM comments
+WHERE post_id = $1
+ORDER BY created_at DESC;
 
--- name: DeleteComment :exec
+-- name: DeleteComment :one
 DELETE FROM comments
-WHERE id = $1 AND user_id = $2;
+WHERE id = $1 RETURNING id;
