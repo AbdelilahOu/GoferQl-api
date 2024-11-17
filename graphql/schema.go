@@ -18,6 +18,12 @@ func NewSchema() (graphql.Schema, error) {
 	for key, val := range queries.PostQueries {
 		QueryFields[key] = val
 	}
+	for key, val := range queries.TagQueries {
+		QueryFields[key] = val
+	}
+	for key, val := range queries.PostTagsQueries {
+		QueryFields[key] = val
+	}
 
 	MutationFields := graphql.Fields{}
 	for key, val := range mutations.UserMutations {
@@ -27,6 +33,12 @@ func NewSchema() (graphql.Schema, error) {
 		MutationFields[key] = val
 	}
 	for key, val := range mutations.PostMutations {
+		MutationFields[key] = val
+	}
+	for key, val := range mutations.TagMutations {
+		MutationFields[key] = val
+	}
+	for key, val := range mutations.PostTagMutations {
 		MutationFields[key] = val
 	}
 
