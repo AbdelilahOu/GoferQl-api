@@ -60,6 +60,41 @@ func (q *Queries) DeleteComment(ctx context.Context, id uuid.UUID) (uuid.UUID, e
 	return id, err
 }
 
+const listCommentsByParentID = `-- name: ListCommentsByParentID :many
+SELECT 
+    id, content, post_id, user_id, parent_id, created_at
+FROM comments
+WHERE parent_id = $1
+ORDER BY created_at DESC
+`
+
+func (q *Queries) ListCommentsByParentID(ctx context.Context, parentID pgtype.UUID) ([]Comment, error) {
+	rows, err := q.db.Query(ctx, listCommentsByParentID, parentID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Comment{}
+	for rows.Next() {
+		var i Comment
+		if err := rows.Scan(
+			&i.ID,
+			&i.Content,
+			&i.PostID,
+			&i.UserID,
+			&i.ParentID,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listCommentsByPostID = `-- name: ListCommentsByPostID :many
 SELECT 
     id, content, post_id, user_id, parent_id, created_at

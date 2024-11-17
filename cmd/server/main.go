@@ -25,6 +25,7 @@ func main() {
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}
+	defer pgPool.Close()
 
 	if err = pgPool.Ping(context.Background()); err != nil {
 		log.Fatal("coudnt ping db:", err)
