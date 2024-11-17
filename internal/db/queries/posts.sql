@@ -23,30 +23,22 @@ WHERE p.id = $1;
 -- name: UpdatePost :one
 UPDATE posts
 SET 
-    title = COALESCE($2, title),
-    content = COALESCE($3, content),
-    category_id = COALESCE($4, category_id),
-    status = COALESCE($5, status),
+    title = COALESCE(sqlc.narg(title), title),
+    content = COALESCE(sqlc.narg(content), content),
+    category_id = COALESCE(sqlc.narg(category_id), category_id),
+    status = COALESCE(sqlc.narg(status), status),
     updated_at = CURRENT_TIMESTAMP
-WHERE id = $1 AND user_id = $6
+WHERE id = $1
 RETURNING *;
 
 -- name: ListPosts :many
 SELECT 
-    p.*,
-    u.username as author_name,
-    c.name as category_name
-FROM posts p
-LEFT JOIN users u ON p.user_id = u.id
-LEFT JOIN categories c ON p.category_id = c.id
-WHERE 
-    ($1::varchar IS NULL OR p.status = $1) AND
-    ($2::integer IS NULL OR p.category_id = $2) AND
-    ($3::integer IS NULL OR p.user_id = $3)
-ORDER BY p.created_at DESC
-LIMIT $4 OFFSET $5;
+    *
+FROM posts
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2;
 
--- name: DeletePost :exec
+-- name: DeletePost :one
 DELETE FROM posts
-WHERE id = $1 AND user_id = $2;
+WHERE id = $1 RETURNING id;
 

@@ -1,6 +1,9 @@
 package utils
 
-import "github.com/jackc/pgx/v5/pgtype"
+import (
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
 func NullablePgTypeText(Args map[string]interface{}, field string) pgtype.Text {
 	if val, ok := Args[field]; ok && val != nil {
@@ -12,5 +15,12 @@ func NullablePgTypeText(Args map[string]interface{}, field string) pgtype.Text {
 	return pgtype.Text{
 		Valid:  false,
 		String: "",
+	}
+}
+
+func UuidToPgTypeUuid(ID uuid.UUID) pgtype.UUID {
+	return pgtype.UUID{
+		Bytes: ID,
+		Valid: ID != uuid.Nil,
 	}
 }

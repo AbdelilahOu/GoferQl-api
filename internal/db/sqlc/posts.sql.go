@@ -54,19 +54,15 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 	return i, err
 }
 
-const deletePost = `-- name: DeletePost :exec
+const deletePost = `-- name: DeletePost :one
 DELETE FROM posts
-WHERE id = $1 AND user_id = $2
+WHERE id = $1 RETURNING id
 `
 
-type DeletePostParams struct {
-	ID     uuid.UUID   `json:"id"`
-	UserID pgtype.UUID `json:"user_id"`
-}
-
-func (q *Queries) DeletePost(ctx context.Context, arg DeletePostParams) error {
-	_, err := q.db.Exec(ctx, deletePost, arg.ID, arg.UserID)
-	return err
+func (q *Queries) DeletePost(ctx context.Context, id uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, deletePost, id)
+	err := row.Scan(&id)
+	return id, err
 }
 
 const getPost = `-- name: GetPost :one
@@ -113,56 +109,26 @@ func (q *Queries) GetPost(ctx context.Context, id uuid.UUID) (GetPostRow, error)
 
 const listPosts = `-- name: ListPosts :many
 SELECT 
-    p.id, p.title, p.content, p.user_id, p.category_id, p.status, p.created_at, p.updated_at,
-    u.username as author_name,
-    c.name as category_name
-FROM posts p
-LEFT JOIN users u ON p.user_id = u.id
-LEFT JOIN categories c ON p.category_id = c.id
-WHERE 
-    ($1::varchar IS NULL OR p.status = $1) AND
-    ($2::integer IS NULL OR p.category_id = $2) AND
-    ($3::integer IS NULL OR p.user_id = $3)
-ORDER BY p.created_at DESC
-LIMIT $4 OFFSET $5
+    id, title, content, user_id, category_id, status, created_at, updated_at
+FROM posts
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2
 `
 
 type ListPostsParams struct {
-	Column1 string `json:"column_1"`
-	Column2 int32  `json:"column_2"`
-	Column3 int32  `json:"column_3"`
-	Limit   int32  `json:"limit"`
-	Offset  int32  `json:"offset"`
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
 }
 
-type ListPostsRow struct {
-	ID           uuid.UUID          `json:"id"`
-	Title        string             `json:"title"`
-	Content      string             `json:"content"`
-	UserID       pgtype.UUID        `json:"user_id"`
-	CategoryID   pgtype.UUID        `json:"category_id"`
-	Status       pgtype.Text        `json:"status"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
-	AuthorName   pgtype.Text        `json:"author_name"`
-	CategoryName pgtype.Text        `json:"category_name"`
-}
-
-func (q *Queries) ListPosts(ctx context.Context, arg ListPostsParams) ([]ListPostsRow, error) {
-	rows, err := q.db.Query(ctx, listPosts,
-		arg.Column1,
-		arg.Column2,
-		arg.Column3,
-		arg.Limit,
-		arg.Offset,
-	)
+func (q *Queries) ListPosts(ctx context.Context, arg ListPostsParams) ([]Post, error) {
+	rows, err := q.db.Query(ctx, listPosts, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []ListPostsRow{}
+	items := []Post{}
 	for rows.Next() {
-		var i ListPostsRow
+		var i Post
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
@@ -172,8 +138,6 @@ func (q *Queries) ListPosts(ctx context.Context, arg ListPostsParams) ([]ListPos
 			&i.Status,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.AuthorName,
-			&i.CategoryName,
 		); err != nil {
 			return nil, err
 		}
@@ -193,17 +157,16 @@ SET
     category_id = COALESCE($4, category_id),
     status = COALESCE($5, status),
     updated_at = CURRENT_TIMESTAMP
-WHERE id = $1 AND user_id = $6
+WHERE id = $1
 RETURNING id, title, content, user_id, category_id, status, created_at, updated_at
 `
 
 type UpdatePostParams struct {
 	ID         uuid.UUID   `json:"id"`
-	Title      string      `json:"title"`
-	Content    string      `json:"content"`
+	Title      pgtype.Text `json:"title"`
+	Content    pgtype.Text `json:"content"`
 	CategoryID pgtype.UUID `json:"category_id"`
 	Status     pgtype.Text `json:"status"`
-	UserID     pgtype.UUID `json:"user_id"`
 }
 
 func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) (Post, error) {
@@ -213,7 +176,6 @@ func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) (Post, e
 		arg.Content,
 		arg.CategoryID,
 		arg.Status,
-		arg.UserID,
 	)
 	var i Post
 	err := row.Scan(

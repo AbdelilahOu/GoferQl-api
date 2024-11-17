@@ -20,7 +20,7 @@ type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteCategory(ctx context.Context, id uuid.UUID) (uuid.UUID, error)
 	DeleteComment(ctx context.Context, arg DeleteCommentParams) error
-	DeletePost(ctx context.Context, arg DeletePostParams) error
+	DeletePost(ctx context.Context, id uuid.UUID) (uuid.UUID, error)
 	DeleteUser(ctx context.Context, id uuid.UUID) (uuid.UUID, error)
 	GetCategory(ctx context.Context, id uuid.UUID) (Category, error)
 	GetComment(ctx context.Context, id uuid.UUID) (GetCommentRow, error)
@@ -31,7 +31,7 @@ type Querier interface {
 	ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error)
 	ListCommentsByPost(ctx context.Context, postID pgtype.UUID) ([]ListCommentsByPostRow, error)
 	ListPostTags(ctx context.Context, postID uuid.UUID) ([]Tag, error)
-	ListPosts(ctx context.Context, arg ListPostsParams) ([]ListPostsRow, error)
+	ListPosts(ctx context.Context, arg ListPostsParams) ([]Post, error)
 	ListPostsByTag(ctx context.Context, arg ListPostsByTagParams) ([]ListPostsByTagRow, error)
 	ListTags(ctx context.Context) ([]Tag, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
