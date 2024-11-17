@@ -8,12 +8,36 @@ import (
 func init() {
 	UserType.AddFieldConfig("posts", &graphql.Field{
 		Type:    graphql.NewList(PostType),
-		Resolve: resolvers.ListPostsByUserID,
+		Resolve: resolvers.ListUserPosts,
 	})
 	UserType.AddFieldConfig("comments", &graphql.Field{
 		Type:    graphql.NewList(CommentType),
-		Resolve: resolvers.ListCommentsByUserID,
+		Resolve: resolvers.ListUserComments,
 	})
+
+	PostType.AddFieldConfig("user", &graphql.Field{
+		Type:    UserType,
+		Resolve: resolvers.GetPostUser,
+	})
+	PostType.AddFieldConfig("comments", &graphql.Field{
+		Type:    graphql.NewList(CommentType),
+		Resolve: resolvers.ListPostComments,
+	})
+	PostTagType.AddFieldConfig("tags", &graphql.Field{
+		Type:    graphql.NewList(TagType),
+		Resolve: resolvers.ListPostTags,
+	})
+
+	CommentType.AddFieldConfig("user", &graphql.Field{
+		Type:    UserType,
+		Resolve: resolvers.GetCommentUser,
+	})
+
+	TagType.AddFieldConfig("posts", &graphql.Field{
+		Type:    graphql.NewList(PostType),
+		Resolve: resolvers.ListTagPosts,
+	})
+
 }
 
 var UserType = graphql.NewObject(

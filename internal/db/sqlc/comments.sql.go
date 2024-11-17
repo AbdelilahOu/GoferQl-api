@@ -66,10 +66,17 @@ SELECT
 FROM comments
 WHERE post_id = $1
 ORDER BY created_at DESC
+LIMIT $2 OFFSET $3
 `
 
-func (q *Queries) ListCommentsByPostID(ctx context.Context, postID pgtype.UUID) ([]Comment, error) {
-	rows, err := q.db.Query(ctx, listCommentsByPostID, postID)
+type ListCommentsByPostIDParams struct {
+	PostID pgtype.UUID `json:"post_id"`
+	Limit  int32       `json:"limit"`
+	Offset int32       `json:"offset"`
+}
+
+func (q *Queries) ListCommentsByPostID(ctx context.Context, arg ListCommentsByPostIDParams) ([]Comment, error) {
+	rows, err := q.db.Query(ctx, listCommentsByPostID, arg.PostID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

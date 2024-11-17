@@ -46,6 +46,16 @@ WHERE user_id = $1
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3;
 
+-- name: ListPostsByTagID :many
+SELECT 
+    p.*
+FROM posts as p
+JOIN post_tags as ps ON ps.post_id = p.id
+WHERE ps.tag_id = $1
+ORDER BY created_at DESC
+LIMIT $2 OFFSET $3;
+
+
 -- name: DeletePost :one
 DELETE FROM posts
 WHERE id = $1 RETURNING id;

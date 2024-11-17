@@ -149,6 +149,51 @@ func (q *Queries) ListPosts(ctx context.Context, arg ListPostsParams) ([]Post, e
 	return items, nil
 }
 
+const listPostsByTagID = `-- name: ListPostsByTagID :many
+SELECT 
+    p.id, p.title, p.content, p.user_id, p.category_id, p.status, p.created_at, p.updated_at
+FROM posts as p
+JOIN post_tags as ps ON ps.post_id = p.id
+WHERE ps.tag_id = $1
+ORDER BY created_at DESC
+LIMIT $2 OFFSET $3
+`
+
+type ListPostsByTagIDParams struct {
+	TagID  uuid.UUID `json:"tag_id"`
+	Limit  int32     `json:"limit"`
+	Offset int32     `json:"offset"`
+}
+
+func (q *Queries) ListPostsByTagID(ctx context.Context, arg ListPostsByTagIDParams) ([]Post, error) {
+	rows, err := q.db.Query(ctx, listPostsByTagID, arg.TagID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Post{}
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Content,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Status,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listPostsByUserID = `-- name: ListPostsByUserID :many
 SELECT 
     id, title, content, user_id, category_id, status, created_at, updated_at

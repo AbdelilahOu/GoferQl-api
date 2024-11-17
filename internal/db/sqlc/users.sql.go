@@ -79,6 +79,26 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 	return i, err
 }
 
+const getUserByCommentID = `-- name: GetUserByCommentID :one
+SELECT u.id, u.username, u.email, u.password, u.bio, u.created_at FROM users as u
+JOIN comments as c ON c.user_id = u.id
+WHERE c.id = $1
+`
+
+func (q *Queries) GetUserByCommentID(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByCommentID, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Password,
+		&i.Bio,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, username, email, password, bio, created_at FROM users
 WHERE email = $1
@@ -86,6 +106,26 @@ WHERE email = $1
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Password,
+		&i.Bio,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getUserByPostID = `-- name: GetUserByPostID :one
+SELECT u.id, u.username, u.email, u.password, u.bio, u.created_at FROM users as u
+JOIN posts as p ON p.user_id = u.id
+WHERE p.id = $1
+`
+
+func (q *Queries) GetUserByPostID(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByPostID, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
