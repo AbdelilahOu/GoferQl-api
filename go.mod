@@ -7,7 +7,6 @@ require (
 	github.com/google/uuid v1.4.0
 	github.com/graphql-go/graphql v0.8.1
 	github.com/jackc/pgx/v5 v5.7.1
-	github.com/lib/pq v1.10.9
 	github.com/spf13/viper v1.19.0
 	golang.org/x/crypto v0.27.0
 )
