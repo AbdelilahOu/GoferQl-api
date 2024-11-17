@@ -1,0 +1,70 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+
+	"github.com/AbdelilahOu/GoferQl/config"
+	graph "github.com/AbdelilahOu/GoferQl/graphql"
+	db "github.com/AbdelilahOu/GoferQl/internal/db/sqlc"
+	"github.com/AbdelilahOu/GoferQl/logger"
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/graphql-go/graphql"
+)
+
+func main() {
+	logger := logger.NewLogger()
+
+	config, err := config.LoadConfig()
+	if err != nil {
+		logger.Fatal("cannot load config:", err)
+	}
+
+	pgPool, err := pgxpool.New(context.Background(), config.DBUrl)
+	if err != nil {
+		logger.Fatal("cannot connect to db:", err)
+	}
+
+	if err = pgPool.Ping(context.Background()); err != nil {
+		logger.Fatal("coudnt ping db:", err)
+	}
+
+	schema, err := graph.NewSchema()
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	dbQueries := db.New(pgPool)
+
+	http.HandleFunc("/graphql", createGraphQLHandler(schema, dbQueries))
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", config.PORT), nil); err != nil {
+		logger.Fatal("server error:", err)
+	}
+}
+
+func createGraphQLHandler(schema graphql.Schema, dbQueries *db.Queries) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var params struct {
+			Query         string                 `json:"query"`
+			OperationName string                 `json:"operationName"`
+			Variables     map[string]interface{} `json:"variables"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		result := graphql.Do(graphql.Params{
+			Schema:        schema,
+			RequestString: params.Query,
+			OperationName: params.OperationName,
+			Context:       context.WithValue(r.Context(), "db", dbQueries),
+		})
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(result)
+	}
+}
