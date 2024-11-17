@@ -1,4 +1,3 @@
-// graph/schema.go
 package graph
 
 import (
