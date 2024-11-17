@@ -9,4 +9,5 @@ WHERE id = $1;
 
 -- name: ListTags :many
 SELECT * FROM tags
-ORDER BY name;
+ORDER BY name
+LIMIT $1 OFFSET $2;
