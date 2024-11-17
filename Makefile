@@ -25,3 +25,6 @@ sqlc:
 
 server: 
 	go run cmd/server/main.go
+
+seed: 
+	go run cmd/seed/main.go

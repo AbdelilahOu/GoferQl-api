@@ -1,0 +1,88 @@
+type Category {
+  createdAt: DateTime
+  description: String
+  id: String
+  name: String
+}
+
+type Comment {
+  children: [Comment]
+  content: String
+  createdAt: DateTime
+  id: String
+  parentId: String
+  postId: String
+  user: User
+  userId: String
+}
+
+"""
+The `DateTime` scalar type represents a DateTime. The DateTime is serialized as an RFC 3339 quoted string
+"""
+scalar DateTime
+
+type Mutation {
+  createCategory(name: String!, description: String!): Category
+  createComment(content: String!, userId: String!, postId: String!, parentId: String!): Comment
+  createPost(title: String!, content: String!, status: String!, userId: String!, categoryId: String!): Post
+  createPostTag(postId: String!, tagId: String!): PostTag
+  createTag(name: String!): Tag
+  createUser(username: String!, email: String!, password: String!, bio: String): User
+  deleteCategory(id: String!): Boolean
+  deleteComment(id: String!): Boolean
+  deletePost(id: String!): Boolean
+  deleteUser(id: String!): Boolean
+  removePostTag(postId: String!, tagId: String!): Boolean
+  updateCategory(name: String, description: String, id: String!): Category
+  updateComment(id: String!, content: String!): Comment
+  updatePost(id: String!, title: String, content: String, status: String, categoryId: String): Post
+  updateUser(email: String, bio: String, id: String!, username: String): User
+}
+
+type Post {
+  categoryId: String
+  comments(commentsLimit: Int): [Comment]
+  content: String
+  createdAt: DateTime
+  id: String
+  status: String
+  title: String
+  updatedAt: DateTime
+  user: User
+  userId: String
+}
+
+type PostTag {
+  postId: String
+  tagId: String
+  tags: [Tag]
+}
+
+type Query {
+  categories(limit: Int, offset: Int): [Category]
+  category(id: String): Category
+  comments(postId: String!): [Comment]
+  post(id: String): Post
+  posts(limit: Int, offset: Int): [Post]
+  tag(id: String): Tag
+  tags(limit: Int, offset: Int): [Tag]
+  user(email: String, id: String): User
+  users(offset: Int, limit: Int): [User]
+}
+
+type Tag {
+  id: String
+  name: String
+  posts(postsLimit: Int): [Post]
+}
+
+type User {
+  bio: String
+  createdAt: DateTime
+  email: String
+  id: String
+  password: String
+  posts: [Post]
+  username: String
+}
+
