@@ -49,84 +49,34 @@ func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) (C
 	return i, err
 }
 
-const deleteComment = `-- name: DeleteComment :exec
+const deleteComment = `-- name: DeleteComment :one
 DELETE FROM comments
-WHERE id = $1 AND user_id = $2
+WHERE id = $1 RETURNING id
 `
 
-type DeleteCommentParams struct {
-	ID     uuid.UUID   `json:"id"`
-	UserID pgtype.UUID `json:"user_id"`
-}
-
-func (q *Queries) DeleteComment(ctx context.Context, arg DeleteCommentParams) error {
-	_, err := q.db.Exec(ctx, deleteComment, arg.ID, arg.UserID)
-	return err
-}
-
-const getComment = `-- name: GetComment :one
-SELECT 
-    c.id, c.content, c.post_id, c.user_id, c.parent_id, c.created_at,
-    u.username as author_name
-FROM comments c
-LEFT JOIN users u ON c.user_id = u.id
-WHERE c.id = $1
-`
-
-type GetCommentRow struct {
-	ID         uuid.UUID          `json:"id"`
-	Content    string             `json:"content"`
-	PostID     pgtype.UUID        `json:"post_id"`
-	UserID     pgtype.UUID        `json:"user_id"`
-	ParentID   pgtype.UUID        `json:"parent_id"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
-	AuthorName pgtype.Text        `json:"author_name"`
-}
-
-func (q *Queries) GetComment(ctx context.Context, id uuid.UUID) (GetCommentRow, error) {
-	row := q.db.QueryRow(ctx, getComment, id)
-	var i GetCommentRow
-	err := row.Scan(
-		&i.ID,
-		&i.Content,
-		&i.PostID,
-		&i.UserID,
-		&i.ParentID,
-		&i.CreatedAt,
-		&i.AuthorName,
-	)
-	return i, err
+func (q *Queries) DeleteComment(ctx context.Context, id uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, deleteComment, id)
+	err := row.Scan(&id)
+	return id, err
 }
 
 const listCommentsByPost = `-- name: ListCommentsByPost :many
 SELECT 
-    c.id, c.content, c.post_id, c.user_id, c.parent_id, c.created_at,
-    u.username as author_name
-FROM comments c
-LEFT JOIN users u ON c.user_id = u.id
-WHERE c.post_id = $1
-ORDER BY c.created_at DESC
+    id, content, post_id, user_id, parent_id, created_at
+FROM comments
+WHERE post_id = $1
+ORDER BY created_at DESC
 `
 
-type ListCommentsByPostRow struct {
-	ID         uuid.UUID          `json:"id"`
-	Content    string             `json:"content"`
-	PostID     pgtype.UUID        `json:"post_id"`
-	UserID     pgtype.UUID        `json:"user_id"`
-	ParentID   pgtype.UUID        `json:"parent_id"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
-	AuthorName pgtype.Text        `json:"author_name"`
-}
-
-func (q *Queries) ListCommentsByPost(ctx context.Context, postID pgtype.UUID) ([]ListCommentsByPostRow, error) {
+func (q *Queries) ListCommentsByPost(ctx context.Context, postID pgtype.UUID) ([]Comment, error) {
 	rows, err := q.db.Query(ctx, listCommentsByPost, postID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []ListCommentsByPostRow{}
+	items := []Comment{}
 	for rows.Next() {
-		var i ListCommentsByPostRow
+		var i Comment
 		if err := rows.Scan(
 			&i.ID,
 			&i.Content,
@@ -134,7 +84,6 @@ func (q *Queries) ListCommentsByPost(ctx context.Context, postID pgtype.UUID) ([
 			&i.UserID,
 			&i.ParentID,
 			&i.CreatedAt,
-			&i.AuthorName,
 		); err != nil {
 			return nil, err
 		}
@@ -144,4 +93,31 @@ func (q *Queries) ListCommentsByPost(ctx context.Context, postID pgtype.UUID) ([
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateComment = `-- name: UpdateComment :one
+UPDATE comments
+SET 
+    content = $2
+WHERE id = $1
+RETURNING id, content, post_id, user_id, parent_id, created_at
+`
+
+type UpdateCommentParams struct {
+	ID      uuid.UUID `json:"id"`
+	Content string    `json:"content"`
+}
+
+func (q *Queries) UpdateComment(ctx context.Context, arg UpdateCommentParams) (Comment, error) {
+	row := q.db.QueryRow(ctx, updateComment, arg.ID, arg.Content)
+	var i Comment
+	err := row.Scan(
+		&i.ID,
+		&i.Content,
+		&i.PostID,
+		&i.UserID,
+		&i.ParentID,
+		&i.CreatedAt,
+	)
+	return i, err
 }
