@@ -9,7 +9,7 @@ import (
 
 var CommentQueries = graphql.Fields{
 	"comments": &graphql.Field{
-		Type: types.CommentType,
+		Type: graphql.NewList(types.CommentType),
 		Args: graphql.FieldConfigArgument{
 			"postId": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
 		},

@@ -15,7 +15,31 @@ func ListCommentsByPost(p graphql.ResolveParams) (interface{}, error) {
 		return nil, err
 	}
 
-	return dbQueries.ListCommentsByPost(p.Context, utils.UuidToPgTypeUuid(ID))
+	return dbQueries.ListCommentsByPostID(p.Context, utils.UuidToPgTypeUuid(ID))
+}
+
+func ListCommentsByUserID(p graphql.ResolveParams) (interface{}, error) {
+	dbQueries := p.Context.Value("db").(*db.Queries)
+
+	var Limit int32 = 20
+	var Offset int32 = 0
+	var UserID uuid.UUID
+
+	if val, ok := p.Args["limit"]; ok && val != nil {
+		Limit = val.(int32)
+	}
+	if val, ok := p.Args["offset"]; ok && val != nil {
+		Offset = val.(int32)
+	}
+	if val, ok := p.Source.(db.User); ok {
+		UserID = val.ID
+	}
+
+	return dbQueries.ListPostsByUserID(p.Context, db.ListPostsByUserIDParams{
+		UserID: utils.UuidToPgTypeUuid(UserID),
+		Limit:  Limit,
+		Offset: Offset,
+	})
 }
 
 func CreateComment(p graphql.ResolveParams) (interface{}, error) {

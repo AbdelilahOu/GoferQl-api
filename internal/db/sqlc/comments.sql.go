@@ -60,7 +60,7 @@ func (q *Queries) DeleteComment(ctx context.Context, id uuid.UUID) (uuid.UUID, e
 	return id, err
 }
 
-const listCommentsByPost = `-- name: ListCommentsByPost :many
+const listCommentsByPostID = `-- name: ListCommentsByPostID :many
 SELECT 
     id, content, post_id, user_id, parent_id, created_at
 FROM comments
@@ -68,8 +68,50 @@ WHERE post_id = $1
 ORDER BY created_at DESC
 `
 
-func (q *Queries) ListCommentsByPost(ctx context.Context, postID pgtype.UUID) ([]Comment, error) {
-	rows, err := q.db.Query(ctx, listCommentsByPost, postID)
+func (q *Queries) ListCommentsByPostID(ctx context.Context, postID pgtype.UUID) ([]Comment, error) {
+	rows, err := q.db.Query(ctx, listCommentsByPostID, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Comment{}
+	for rows.Next() {
+		var i Comment
+		if err := rows.Scan(
+			&i.ID,
+			&i.Content,
+			&i.PostID,
+			&i.UserID,
+			&i.ParentID,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listCommentsByUserID = `-- name: ListCommentsByUserID :many
+SELECT 
+    id, content, post_id, user_id, parent_id, created_at
+FROM comments
+WHERE user_id = $1
+ORDER BY created_at DESC
+LIMIT $2 OFFSET $3
+`
+
+type ListCommentsByUserIDParams struct {
+	UserID pgtype.UUID `json:"user_id"`
+	Limit  int32       `json:"limit"`
+	Offset int32       `json:"offset"`
+}
+
+func (q *Queries) ListCommentsByUserID(ctx context.Context, arg ListCommentsByUserIDParams) ([]Comment, error) {
+	rows, err := q.db.Query(ctx, listCommentsByUserID, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
