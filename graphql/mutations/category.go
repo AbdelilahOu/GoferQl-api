@@ -12,7 +12,7 @@ var CategoryMutations = graphql.Fields{
 		Type: types.CategoryType,
 		Args: graphql.FieldConfigArgument{
 			"name":        &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
-			"description": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+			"description": &graphql.ArgumentConfig{Type: graphql.String},
 		},
 		Resolve: resolvers.CreateCategory,
 	},

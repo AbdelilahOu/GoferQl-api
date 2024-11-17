@@ -13,7 +13,7 @@ var PostMutations = graphql.Fields{
 		Args: graphql.FieldConfigArgument{
 			"title":      &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
 			"content":    &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
-			"status":     &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+			"status":     &graphql.ArgumentConfig{Type: graphql.String},
 			"userId":     &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
 			"categoryId": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
 		},
