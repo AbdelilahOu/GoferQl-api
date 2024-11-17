@@ -19,7 +19,7 @@ GoferQL API is a GraphQL server that provides a flexible API for managing posts,
 .
 ├── cmd/
 │   ├── seed/
-│   │   └── main.go // generate dumy data
+│   │   └── main.go // generate dummy data
 │   └── server/
 │       └── main.go // server handler
 ├── config/
@@ -159,12 +159,4 @@ mutation {
     createdAt
   }
 }
-```
-
-## Development
-
-Generate SQLC code:
-
-```bash
-sqlc generate
 ```
