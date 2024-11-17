@@ -15,12 +15,18 @@ func NewSchema() (graphql.Schema, error) {
 	for key, val := range queries.CategoryQueries {
 		QueryFields[key] = val
 	}
+	for key, val := range queries.PostQueries {
+		QueryFields[key] = val
+	}
 
 	MutationFields := graphql.Fields{}
 	for key, val := range mutations.UserMutations {
 		MutationFields[key] = val
 	}
 	for key, val := range mutations.CategoryMutations {
+		MutationFields[key] = val
+	}
+	for key, val := range mutations.PostMutations {
 		MutationFields[key] = val
 	}
 
