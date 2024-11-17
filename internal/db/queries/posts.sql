@@ -38,6 +38,14 @@ FROM posts
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2;
 
+-- name: ListPostsByUserID :many
+SELECT 
+    *
+FROM posts
+WHERE user_id = $1
+ORDER BY created_at DESC
+LIMIT $2 OFFSET $3;
+
 -- name: DeletePost :one
 DELETE FROM posts
 WHERE id = $1 RETURNING id;

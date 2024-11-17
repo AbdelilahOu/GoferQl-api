@@ -9,7 +9,7 @@ import (
 
 var PostTagsQueries = graphql.Fields{
 	"postTags": &graphql.Field{
-		Type: types.PostTagType,
+		Type: graphql.NewList(types.PostTagType),
 		Args: graphql.FieldConfigArgument{
 			"postId": &graphql.ArgumentConfig{Type: graphql.String},
 			"tagId":  &graphql.ArgumentConfig{Type: graphql.String},

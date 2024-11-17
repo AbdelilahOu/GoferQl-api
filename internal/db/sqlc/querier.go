@@ -28,10 +28,12 @@ type Querier interface {
 	GetUser(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error)
-	ListCommentsByPost(ctx context.Context, postID pgtype.UUID) ([]Comment, error)
+	ListCommentsByPostID(ctx context.Context, postID pgtype.UUID) ([]Comment, error)
+	ListCommentsByUserID(ctx context.Context, arg ListCommentsByUserIDParams) ([]Comment, error)
 	ListPostTags(ctx context.Context, postID uuid.UUID) ([]Tag, error)
 	ListPosts(ctx context.Context, arg ListPostsParams) ([]Post, error)
 	ListPostsByTag(ctx context.Context, arg ListPostsByTagParams) ([]ListPostsByTagRow, error)
+	ListPostsByUserID(ctx context.Context, arg ListPostsByUserIDParams) ([]Post, error)
 	ListTags(ctx context.Context, arg ListTagsParams) ([]Tag, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	RemovePostTag(ctx context.Context, arg RemovePostTagParams) error

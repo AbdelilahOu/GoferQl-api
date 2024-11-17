@@ -15,12 +15,20 @@ SET
 WHERE id = $1
 RETURNING *;
 
--- name: ListCommentsByPost :many
+-- name: ListCommentsByPostID :many
 SELECT 
     *
 FROM comments
 WHERE post_id = $1
 ORDER BY created_at DESC;
+
+-- name: ListCommentsByUserID :many
+SELECT 
+    *
+FROM comments
+WHERE user_id = $1
+ORDER BY created_at DESC
+LIMIT $2 OFFSET $3;
 
 -- name: DeleteComment :one
 DELETE FROM comments

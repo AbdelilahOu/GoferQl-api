@@ -1,6 +1,20 @@
 package types
 
-import "github.com/graphql-go/graphql"
+import (
+	"github.com/AbdelilahOu/GoferQl/graphql/resolvers"
+	"github.com/graphql-go/graphql"
+)
+
+func init() {
+	UserType.AddFieldConfig("posts", &graphql.Field{
+		Type:    graphql.NewList(PostType),
+		Resolve: resolvers.ListPostsByUserID,
+	})
+	UserType.AddFieldConfig("comments", &graphql.Field{
+		Type:    graphql.NewList(CommentType),
+		Resolve: resolvers.ListCommentsByUserID,
+	})
+}
 
 var UserType = graphql.NewObject(
 	graphql.ObjectConfig{
