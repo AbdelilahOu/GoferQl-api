@@ -11,19 +11,19 @@ import (
 func ListTags(p graphql.ResolveParams) (interface{}, error) {
 	dbQueries := p.Context.Value("db").(*db.Queries)
 
-	var Limit int32 = 20
-	var Offset int32 = 0
+	var Limit int = 20
+	var Offset int = 0
 
 	if val, ok := p.Args["limit"]; ok && val != nil {
-		Limit = val.(int32)
+		Limit = val.(int)
 	}
 	if val, ok := p.Args["offset"]; ok && val != nil {
-		Offset = val.(int32)
+		Offset = val.(int)
 	}
 
 	return dbQueries.ListTags(p.Context, db.ListTagsParams{
-		Limit:  Limit,
-		Offset: Offset,
+		Limit:  int32(Limit),
+		Offset: int32(Offset),
 	})
 }
 

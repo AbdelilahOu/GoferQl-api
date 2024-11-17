@@ -12,34 +12,30 @@ import (
 func ListPosts(p graphql.ResolveParams) (interface{}, error) {
 	dbQueries := p.Context.Value("db").(*db.Queries)
 
-	var Limit int32 = 20
-	var Offset int32 = 0
+	var Limit int = 20
+	var Offset int = 0
 
 	if val, ok := p.Args["limit"]; ok && val != nil {
-		Limit = val.(int32)
+		Limit = val.(int)
 	}
 	if val, ok := p.Args["offset"]; ok && val != nil {
-		Offset = val.(int32)
+		Offset = val.(int)
 	}
 
 	return dbQueries.ListPosts(p.Context, db.ListPostsParams{
-		Limit:  Limit,
-		Offset: Offset,
+		Limit:  int32(Limit),
+		Offset: int32(Offset),
 	})
 }
 
 func ListTagPosts(p graphql.ResolveParams) (interface{}, error) {
 	dbQueries := p.Context.Value("db").(*db.Queries)
 
-	var Limit int32 = 20
-	var Offset int32 = 0
+	var Limit int = 20
 	var TagID uuid.UUID
 
-	if val, ok := p.Args["limit"]; ok && val != nil {
-		Limit = val.(int32)
-	}
-	if val, ok := p.Args["offset"]; ok && val != nil {
-		Offset = val.(int32)
+	if val, ok := p.Args["postsLimit"]; ok && val != nil {
+		Limit = val.(int)
 	}
 	if val, ok := p.Source.(db.Tag); ok {
 		TagID = val.ID
@@ -47,8 +43,8 @@ func ListTagPosts(p graphql.ResolveParams) (interface{}, error) {
 
 	return dbQueries.ListPostsByTagID(p.Context, db.ListPostsByTagIDParams{
 		TagID:  TagID,
-		Limit:  Limit,
-		Offset: Offset,
+		Limit:  int32(Limit),
+		Offset: 0,
 	})
 }
 
@@ -60,9 +56,7 @@ func ListUserPosts(p graphql.ResolveParams) (interface{}, error) {
 		UserID = val.ID
 	}
 
-	return dbQueries.ListPostsByUserID(p.Context, db.ListPostsByUserIDParams{
-		UserID: utils.UuidToPgTypeUuid(UserID),
-	})
+	return dbQueries.ListPostsByUserID(p.Context, utils.UuidToPgTypeUuid(UserID))
 }
 
 func GetPost(p graphql.ResolveParams) (interface{}, error) {

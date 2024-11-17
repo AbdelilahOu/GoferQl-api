@@ -10,17 +10,16 @@ func init() {
 		Type:    graphql.NewList(PostType),
 		Resolve: resolvers.ListUserPosts,
 	})
-	UserType.AddFieldConfig("comments", &graphql.Field{
-		Type:    graphql.NewList(CommentType),
-		Resolve: resolvers.ListUserComments,
-	})
 
 	PostType.AddFieldConfig("user", &graphql.Field{
 		Type:    UserType,
 		Resolve: resolvers.GetPostUser,
 	})
 	PostType.AddFieldConfig("comments", &graphql.Field{
-		Type:    graphql.NewList(CommentType),
+		Type: graphql.NewList(CommentType),
+		Args: graphql.FieldConfigArgument{
+			"commentsLimit": &graphql.ArgumentConfig{Type: graphql.Int},
+		},
 		Resolve: resolvers.ListPostComments,
 	})
 	PostTagType.AddFieldConfig("tags", &graphql.Field{
@@ -32,14 +31,16 @@ func init() {
 		Type:    UserType,
 		Resolve: resolvers.GetCommentUser,
 	})
-
 	CommentType.AddFieldConfig("children", &graphql.Field{
 		Type:    graphql.NewList(CommentType),
 		Resolve: resolvers.ListCommentChildren,
 	})
 
 	TagType.AddFieldConfig("posts", &graphql.Field{
-		Type:    graphql.NewList(PostType),
+		Type: graphql.NewList(PostType),
+		Args: graphql.FieldConfigArgument{
+			"postsLimit": &graphql.ArgumentConfig{Type: graphql.Int},
+		},
 		Resolve: resolvers.ListTagPosts,
 	})
 

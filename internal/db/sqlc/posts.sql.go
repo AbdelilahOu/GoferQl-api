@@ -200,17 +200,10 @@ SELECT
 FROM posts
 WHERE user_id = $1
 ORDER BY created_at DESC
-LIMIT $2 OFFSET $3
 `
 
-type ListPostsByUserIDParams struct {
-	UserID pgtype.UUID `json:"user_id"`
-	Limit  int32       `json:"limit"`
-	Offset int32       `json:"offset"`
-}
-
-func (q *Queries) ListPostsByUserID(ctx context.Context, arg ListPostsByUserIDParams) ([]Post, error) {
-	rows, err := q.db.Query(ctx, listPostsByUserID, arg.UserID, arg.Limit, arg.Offset)
+func (q *Queries) ListPostsByUserID(ctx context.Context, userID pgtype.UUID) ([]Post, error) {
+	rows, err := q.db.Query(ctx, listPostsByUserID, userID)
 	if err != nil {
 		return nil, err
 	}
