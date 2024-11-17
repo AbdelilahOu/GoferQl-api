@@ -10,50 +10,35 @@ import (
 func ListCommentsByPostID(p graphql.ResolveParams) (interface{}, error) {
 	dbQueries := p.Context.Value("db").(*db.Queries)
 
-	var Limit int32 = 20
-	var Offset int32 = 0
+	var Limit int = 20
+	var Offset int = 0
 
 	ID, err := uuid.Parse(p.Args["postId"].(string))
 	if err != nil {
 		return nil, err
 	}
 	if val, ok := p.Args["limit"]; ok && val != nil {
-		Limit = val.(int32)
+		Limit = val.(int)
 	}
 	if val, ok := p.Args["offset"]; ok && val != nil {
-		Offset = val.(int32)
+		Offset = val.(int)
 	}
 
 	return dbQueries.ListCommentsByPostID(p.Context, db.ListCommentsByPostIDParams{
 		PostID: utils.UuidToPgTypeUuid(ID),
-		Limit:  Limit,
-		Offset: Offset,
+		Limit:  int32(Limit),
+		Offset: int32(Offset),
 	})
-}
-
-func ListUserComments(p graphql.ResolveParams) (interface{}, error) {
-	dbQueries := p.Context.Value("db").(*db.Queries)
-
-	var UserID uuid.UUID
-	if val, ok := p.Source.(db.User); ok {
-		UserID = val.ID
-	}
-
-	return dbQueries.ListCommentsByUserID(p.Context, utils.UuidToPgTypeUuid(UserID))
 }
 
 func ListPostComments(p graphql.ResolveParams) (interface{}, error) {
 	dbQueries := p.Context.Value("db").(*db.Queries)
 
-	var Limit int32 = 20
-	var Offset int32 = 0
+	var Limit int = 20
 	var PostID uuid.UUID
 
-	if val, ok := p.Args["limit"]; ok && val != nil {
-		Limit = val.(int32)
-	}
-	if val, ok := p.Args["offset"]; ok && val != nil {
-		Offset = val.(int32)
+	if val, ok := p.Args["commentsLimit"]; ok && val != nil {
+		Limit = val.(int)
 	}
 	if val, ok := p.Source.(db.Post); ok {
 		PostID = val.ID
@@ -61,8 +46,8 @@ func ListPostComments(p graphql.ResolveParams) (interface{}, error) {
 
 	return dbQueries.ListCommentsByPostID(p.Context, db.ListCommentsByPostIDParams{
 		PostID: utils.UuidToPgTypeUuid(PostID),
-		Limit:  Limit,
-		Offset: Offset,
+		Limit:  int32(Limit),
+		Offset: 0,
 	})
 }
 

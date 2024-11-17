@@ -37,7 +37,7 @@ type Querier interface {
 	ListPosts(ctx context.Context, arg ListPostsParams) ([]Post, error)
 	ListPostsByTag(ctx context.Context, arg ListPostsByTagParams) ([]ListPostsByTagRow, error)
 	ListPostsByTagID(ctx context.Context, arg ListPostsByTagIDParams) ([]Post, error)
-	ListPostsByUserID(ctx context.Context, arg ListPostsByUserIDParams) ([]Post, error)
+	ListPostsByUserID(ctx context.Context, userID pgtype.UUID) ([]Post, error)
 	ListTags(ctx context.Context, arg ListTagsParams) ([]Tag, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	RemovePostTag(ctx context.Context, arg RemovePostTagParams) error
