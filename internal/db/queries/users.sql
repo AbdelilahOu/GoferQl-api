@@ -16,6 +16,16 @@ WHERE id = $1;
 SELECT * FROM users
 WHERE email = $1;
 
+-- name: GetUserByPostID :one
+SELECT u.* FROM users as u
+JOIN posts as p ON p.user_id = u.id
+WHERE p.id = $1;
+
+-- name: GetUserByCommentID :one
+SELECT u.* FROM users as u
+JOIN comments as c ON c.user_id = u.id
+WHERE c.id = $1;
+
 -- name: UpdateUser :one
 UPDATE users
 SET 

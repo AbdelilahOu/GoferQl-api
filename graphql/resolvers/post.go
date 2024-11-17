@@ -28,7 +28,31 @@ func ListPosts(p graphql.ResolveParams) (interface{}, error) {
 	})
 }
 
-func ListPostsByUserID(p graphql.ResolveParams) (interface{}, error) {
+func ListTagPosts(p graphql.ResolveParams) (interface{}, error) {
+	dbQueries := p.Context.Value("db").(*db.Queries)
+
+	var Limit int32 = 20
+	var Offset int32 = 0
+	var TagID uuid.UUID
+
+	if val, ok := p.Args["limit"]; ok && val != nil {
+		Limit = val.(int32)
+	}
+	if val, ok := p.Args["offset"]; ok && val != nil {
+		Offset = val.(int32)
+	}
+	if val, ok := p.Source.(db.Tag); ok {
+		TagID = val.ID
+	}
+
+	return dbQueries.ListPostsByTagID(p.Context, db.ListPostsByTagIDParams{
+		TagID:  TagID,
+		Limit:  Limit,
+		Offset: Offset,
+	})
+}
+
+func ListUserPosts(p graphql.ResolveParams) (interface{}, error) {
 	dbQueries := p.Context.Value("db").(*db.Queries)
 
 	var Limit int32 = 20

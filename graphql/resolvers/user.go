@@ -45,6 +45,30 @@ func GetUser(p graphql.ResolveParams) (interface{}, error) {
 	return nil, fmt.Errorf("id or email not provided")
 }
 
+func GetPostUser(p graphql.ResolveParams) (interface{}, error) {
+	dbQueries := p.Context.Value("db").(*db.Queries)
+
+	var PostID uuid.UUID
+
+	if val, ok := p.Source.(db.Post); ok {
+		PostID = val.ID
+	}
+
+	return dbQueries.GetUserByPostID(p.Context, PostID)
+}
+
+func GetCommentUser(p graphql.ResolveParams) (interface{}, error) {
+	dbQueries := p.Context.Value("db").(*db.Queries)
+
+	var CommentID uuid.UUID
+
+	if val, ok := p.Source.(db.Comment); ok {
+		CommentID = val.ID
+	}
+
+	return dbQueries.GetUserByCommentID(p.Context, CommentID)
+}
+
 func CreateUser(p graphql.ResolveParams) (interface{}, error) {
 	dbQueries := p.Context.Value("db").(*db.Queries)
 

@@ -13,6 +13,6 @@ var CommentQueries = graphql.Fields{
 		Args: graphql.FieldConfigArgument{
 			"postId": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
 		},
-		Resolve: resolvers.ListCommentsByPost,
+		Resolve: resolvers.ListCommentsByPostID,
 	},
 }

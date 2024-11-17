@@ -9,9 +9,9 @@ import (
 func ListPostTags(p graphql.ResolveParams) (interface{}, error) {
 	dbQueries := p.Context.Value("db").(*db.Queries)
 
-	PostID, err := uuid.Parse(p.Args["postId"].(string))
-	if err != nil {
-		return nil, err
+	var PostID uuid.UUID
+	if val, ok := p.Source.(db.Post); ok {
+		PostID = val.ID
 	}
 
 	return dbQueries.ListPostTags(p.Context, PostID)
