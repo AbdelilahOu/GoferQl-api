@@ -68,8 +68,8 @@ GoferQL API is a GraphQL server that provides a flexible API for managing posts,
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/goferql-api.git
-cd goferql-api
+git clone https://github.com/AbdelilahOu/GoferQl-api
+cd GoferQl-api
 ```
 
 2. Install dependencies:
